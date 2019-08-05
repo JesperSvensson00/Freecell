@@ -1,3 +1,5 @@
+let spreadsheet;
+
 var playingPiles;
 var endPiles;
 var cellPiles;
@@ -8,21 +10,33 @@ var cardHeight;
 var startDeck;
 
 var ppPressed, epPressed, cpPressed = false;
+var prevCardSpot = {
+  pileNr: null,
+  cardNr: null
+};
+var prevCard = null;
+let selectedCards = [];
+
+function preload(){
+
+}
 
 function setup() {
   createCanvas(1400, 900);
+
 
   startDeck = newDeckOfCards();
   startDeck.shuffle();
 
   playingPiles = [new Deck([], 8),
-                  new Deck([], 9),
-                  new Deck([], 10),
-                  new Deck([], 11),
-                  new Deck([], 12),
-                  new Deck([], 13),
-                  new Deck([], 14),
-                  new Deck([], 15)];
+        new Deck([], 9),
+        new Deck([], 10),
+        new Deck([], 11),
+        new Deck([], 12),
+        new Deck([], 13),
+        new Deck([], 14),
+        new Deck([], 15)
+    ];
 
   cellPiles = [new Deck([], 0), new Deck([], 1), new Deck([], 2), new Deck([], 3)];
   endPiles = [new Deck([], 4), new Deck([], 5), new Deck([], 6), new Deck([], 7)];
@@ -31,29 +45,13 @@ function setup() {
   cardWidth = 125;
 
 
-  dealCards();
+  dealCards(startDeck);
 }
 
 function draw() {
-  background(11, 140, 15);
+  background(45, 170, 45);
 
   drawDecks();
-
-
-  //Guide lines
-  strokeWeight(2);
-  stroke(20, 20, 200);
-  //Top piles
-  line(0, 30, width, 30);
-  line(0, 230, width, 230);
-  //Playing piles top
-  line(0, 260, width, 260);
-  //Middle
-  line(width / 2, 0, width / 2, height);
-  //Sides
-  let margin = 50;
-  line(margin, 0, margin, height);
-  line(width - margin, 0, width - margin, height);
 }
 
 function drawDecks() {
@@ -68,50 +66,212 @@ function drawDecks() {
   for (let pd = 0; pd < playingPiles.length; pd++) {
     for (let c = 0; c < playingPiles[pd].size(); c++) {
       let card = playingPiles[pd].deck[c];
-      fill(200);
-      stroke(0);
-      rect(sideMargin + (cardWidth + xspace) * pd, ppTopMargin + yspace * c, cardWidth, cardHeight);
-      fill(0);
-      text(card.toString(), sideMargin + (cardWidth + xspace) * pd + (cardWidth / 2), ppTopMargin + yspace * c + 30);
+      card.show(sideMargin + (cardWidth + xspace) * pd, ppTopMargin + yspace * c, cardWidth, cardHeight);
     }
   }
-  //Toppiles
+  //Top piles
   let topMargin = 30;
+
   //Cell piles
   for (let cd = 0; cd < cellPiles.length; cd++) {
-    for (let c = 0; c < cellPiles[cd].deck.length; c++) {
-      let card = cellPiles[cd].deck[c];
-      fill(200);
-      rect(sideMargin + (cardWidth + xspace) * cd, topMargin, cardWidth, cardHeight);
-      fill(0);
-      text(card.toString(), sideMargin + (cardWidth + xspace) * cd + (cardWidth / 2), topMargin + cardHeight / 2);
+    if (cellPiles[cd].size() == 0) {
+      noFill();
+      stroke(10, 240, 20);
+      strokeWeight(2);
+      rect(sideMargin + (cardWidth + xspace) * cd, topMargin, cardWidth, cardHeight, 10);
+    } else {
+      cellPiles[cd].getTopCard().show(sideMargin + (cardWidth + xspace) * cd, topMargin, cardWidth, cardHeight);
     }
   }
   //End piles
   for (let ed = 0; ed < endPiles.length; ed++) {
-    for (let c = 0; c < endPiles[ed].deck.length; c++) {
-      let card = endPiles[ed].deck[c];
-      fill(200);
-      rect(sideMargin + (cardWidth + xspace) * (ed + 4), topMargin, cardWidth, cardHeight);
-      fill(0);
-      text(card.toString(), sideMargin + (cardWidth + xspace) * (ed + 4) + (cardWidth / 2), topMargin + cardHeight / 2);
+    if (endPiles[ed].size() == 0) {
+      noFill();
+      stroke(10, 240, 20);
+      strokeWeight(2);
+      rect(sideMargin + (cardWidth + xspace) * (ed+4), topMargin, cardWidth, cardHeight, 10);
+    } else {
+      endPiles[ed].getTopCard().show(sideMargin + (cardWidth + xspace) * (ed+4), topMargin, cardWidth, cardHeight);
     }
   }
 
 }
 
-function dealCards() {
-  for (let i = 0; i < startDeck.size(); i++) {
-    startDeck.moveTopCard(playingPiles[i % playingPiles.length]);
+function dealCards(dealDeck) {
+  let size = dealDeck.size();
+  for (let i = 0; i < size; i++) {
+    dealDeck.moveTopCard(playingPiles[i % playingPiles.length]);
   }
 }
 
 function mouseClicked() {
-  findPile(mouseX, mouseY);
+  let cardSpot = findCardSpot(mouseX, mouseY);
+  if (cardSpot === null) {
+    return;
+  }
 
+  //Check if it is the first or second press
+  if (!ppPressed && !epPressed && !cpPressed) /*First press*/ {
+    firstPress(cardSpot);
+  } else /*Second press*/ {
+    secondPress(cardSpot);
+  }
 }
 
-function findPile(x, y) {
+function firstPress(cardSpot) {
+  if (getCard(cardSpot) === null) {
+    return;
+  }
+  if (cardSpot.pileNr > 7) {
+    if (cardSpot.cardNr == playingPiles[cardSpot.pileNr - 8].size() - 1) {
+      //Top card
+      ppPressed = true;
+      getCard(cardSpot).selected = true;
+    } else {
+      /*Multiple cards selected*/
+      return;
+      //Creates an array of the selected cards
+      selectedCards = playingPiles[cardSpot.pileNr - 8].deck.slice(cardSpot.cardNr);
+
+      //The cards needs to be in order
+      if (inOrder(selectedCards) && inAltColor(selectedCards)) {
+        //Seleces all the cards
+        ppPressed = true;
+        //Highlights the selected cards
+        for (let i = 0; i < selectedCards.length; i++) {
+          selectedCards[i].selected = true;
+        }
+      }
+    }
+  } else if (cardSpot.pileNr > 3) {
+    //Can't move from endpiles
+    print("You cant move cards from the endpile!");
+    return;
+  } else {
+    //Cellpiles
+    cpPressed = true;
+    getCard(cardSpot).selected = true;
+  }
+  prevCardSpot = cardSpot;
+  prevCard = getCard(cardSpot);
+}
+
+function secondPress(cardSpot) {
+  if (cardSpot.pileNr == prevCardSpot.pileNr) {
+    //If the same pile is pressed
+    prevCard.selected = false;
+    ppPressed = false;
+    epPressed = false;
+    cpPressed = false;
+  } else {
+    /*
+     *   TRY MOVE
+     */
+    if (ppPressed) {
+      //Try move from playing piles
+      if (cardSpot.pileNr > 7) {
+        let pile1 = playingPiles[prevCardSpot.pileNr - 8];
+        let pile2 = playingPiles[cardSpot.pileNr - 8];
+        if (pile1.getTopCard().isRed() != pile2.getTopCard().isRed()) {
+          if (pile1.getTopCard().value == pile2.getTopCard().value - 1) {
+            pile1.moveTopCard(pile2);
+          } else {
+            print("Korten ska ligga i ordningen kung till äss!");
+          }
+        } else {
+          print("Korten ska ligga med växlande färg!");
+        }
+      } else if (cardSpot.pileNr > 3) {
+        //PP to EP
+        let endPile = endPiles[cardSpot.pileNr - 4];
+        let playingPile = playingPiles[prevCardSpot.pileNr - 8];
+        if (endPile.getTopCard().value == playingPile.getTopCard().value - 1) {
+          if (endPile.getTopCard().suit == playingPile.getTopCard().suit) {
+            playingPile.moveTopCard(endPile);
+          } else {
+            print("Korten ska ha samma färg i bashögarna!");
+          }
+        } else {
+          print("Korten ska ligga i ordning äss till kung i bashögarna!");
+        }
+      } else {
+        //PP to CP
+        let cellPile = cellPiles[cardSpot.pileNr];
+        let playingPile = playingPiles[prevCardSpot.pileNr - 8];
+        if (cellPile.size() == 0) {
+          playingPile.moveTopCard(cellPile);
+        } else {
+          print("Det får bara finnas ett kort här!");
+        }
+      }
+    } else if (cpPressed) {
+      //Try move from cell piles
+      if (cardSpot.pileNr > 7) {
+        //CP to PP
+        print("CP to PP");
+      } else if (cardSpot.pileNr > 3) {
+        //CP to EP
+        print("CP to EP");
+      } else {
+        //CP to CP
+        print("CP to CP");
+      }
+    }
+    clearSelection();
+  }
+}
+
+function moveCard(pile1, pile2, cards) {
+  //Card move from pile1 to pile2
+}
+
+function clearSelection() {
+  prevCard.selected = false;
+  prevCard = null;
+  prevCardSpot = {
+    pileNr: null,
+    cardNr: null
+  };
+  for (let i = 0; i < selectedCards.length; i++) {
+    selectedCards[i].selected = false;
+  }
+  selectedCards = [];
+  ppPressed = false;
+  epPressed = false;
+  cpPressed = false;
+}
+
+function getCard(cardSpot) {
+  let card;
+  if (cardSpot.pileNr > 7) {
+    //Playinpile
+    if (playingPiles[cardSpot.pileNr - 8].size() == 0) {
+      print("Det finns inget kort här!");
+      return null;
+    } else {
+      card = playingPiles[cardSpot.pileNr - 8].deck[cardSpot.cardNr];
+    }
+  } else if (cardSpot.pileNr > 3) {
+    //Endpiles
+    if (endPiles[cardSpot.pileNr - 4].size() == 0) {
+      print("Det finns inget kort här!");
+      return null;
+    } else {
+      card = endPiles[cardSpot.pileNr - 4].deck[cardSpot.cardNr];
+    }
+  } else {
+    //Cellpiles
+    if (cellPiles[cardSpot.pileNr].size() == 0) {
+      print("Det finns inget kort här!");
+      return null;
+    } else {
+      card = cellPiles[cardSpot.pileNr].deck[cardSpot.cardNr];
+    }
+  }
+  return card;
+}
+
+function findCardSpot(x, y) {
   let sideMargin = 50;
   let topMargin = 30;
   let middleMargin = 30;
@@ -119,51 +279,52 @@ function findPile(x, y) {
   let xspace = (width - 2 * sideMargin - 8 * cardWidth) / 7;
   let yspace = 55;
 
+  let pileNr = null;
+  let cardNr = null;
   if (x > sideMargin && x < width - sideMargin) {
     x = x - sideMargin;
     //In the top area
     if (y > topMargin && y < topMargin + cardHeight) {
-      let pileNr = null;
-
       for (let i = 0; i < 8; i++) {
         if (x > (cardWidth + xspace) * i && x < cardWidth + (cardWidth + xspace) * i) {
           pileNr = i;
+          cardNr = 0;
           break;
         }
       }
-      print("Deck number is: " + pileNr);
-    }
-
-    //Playing piles area
-    if (y > ppTopMargin && y < height) {
-      let pileNr = null;
-
+    } else if (y > ppTopMargin && y < height) { //Playing piles area
       for (let i = 0; i < 8; i++) {
         if (x > (cardWidth + xspace) * i && x < cardWidth + (cardWidth + xspace) * i) {
           pileNr = i + 8;
           break;
         }
       }
+      if (pileNr === null) {
+        return null;
+      }
       if (y < ppTopMargin + yspace * (playingPiles[pileNr - 8].size() - 1) + cardHeight) {
-        let cardNr = null;
 
         //Cheks wich card was pressed
         for (let i = 0; i < playingPiles[pileNr - 8].size() - 1; i++) {
-          if (y > ppTopMargin + yspace*i && y < ppTopMargin + yspace*(i+1)) {
+          if (y > ppTopMargin + yspace * i && y < ppTopMargin + yspace * (i + 1)) {
             cardNr = i;
             break;
           } else {
             cardNr = playingPiles[pileNr - 8].size() - 1;
           }
         }
-
-        print("Pressed deck " + pileNr + " & card " + cardNr);
+        if (pileNr === null) {
+          return null;
+        }
       }
     }
-  }
-
-  function moveCard(pile1, card1, pile2, card2){
-
+    if (pileNr === null) {
+      return null;
+    }
+    return {
+      pileNr: pileNr,
+      cardNr: cardNr
+    };
   }
 
 }
