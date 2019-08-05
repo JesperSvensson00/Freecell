@@ -8,6 +8,7 @@ var cardWidth;
 var cardHeight;
 
 var startDeck;
+var gameWon = false;
 
 var ppPressed, epPressed, cpPressed = false;
 var prevCardSpot = {
@@ -15,7 +16,9 @@ var prevCardSpot = {
   cardNr: null
 };
 var prevCard = null;
-let selectedCards = [];
+var selectedCards = [];
+
+var dragedCard;
 
 function preload() {
 
@@ -51,7 +54,33 @@ function setup() {
 function draw() {
   background(45, 170, 45);
 
-  drawDecks();
+  if (gameWon) {
+
+  } else {
+    drawDecks();
+  }
+  //  if (mouseIsPressed && dragedCard !== null) {
+  //    dragedCard.show(mouseX, mouseY, cardWidth, cardHeight);
+  //  }
+
+}
+
+function mousePressed() {
+  if (mouseX < width && mouseX > 0 && mouseY > 0 && mouseY < height) {
+    let cardSpot = findCardSpot(mouseX, mouseY);
+    if (cardSpot == null) {
+      return;
+    }
+    if (cardSpot.pileNr > 7) {
+      dragedCard = playingPiles[cardSpot.pileNr - 8].getTopCard();
+    } else if (cardSpot.pileNr < 3) {
+      dragedCard = cellPiles[cardSpot.pileNr].getTopCard();
+    }
+  }
+}
+
+function mouseReleased() {
+  dragedCard = null;
 }
 
 function drawDecks() {
@@ -116,7 +145,14 @@ function dealCards(dealDeck) {
 }
 
 function mouseClicked() {
-  let cardSpot = findCardSpot(mouseX, mouseY);
+  let cardSpot;
+  if (mouseY > 0 && mouseY < height) {
+    cardSpot = findCardSpot(mouseX, mouseY);
+  } else {
+    return;
+  }
+
+  //If the press is not on a card
   if (cardSpot === null) {
     return;
   }
@@ -131,16 +167,35 @@ function mouseClicked() {
 
 function doubleClicked() {
   clearSelection();
-  let cardSpot = findCardSpot(mouseX, mouseY);
+  let cardSpot;
+  if (mouseY > 0 && mouseY < height) {
+    cardSpot = findCardSpot(mouseX, mouseY);
+  } else {
+    return;
+  }
   if (cardSpot === null) {
     return;
   }
+  if (cardSpot.pileNr > 7) {
+    if (cardSpot.cardNr == playingPiles[cardSpot.pileNr - 8].size() - 1) {
+      let card = playingPiles[cardSpot.pileNr - 8].getTopCard();
+      for (let i = 0; i < endPiles.length; i++) {
+        if (card.suit == i && card.value - 1 == endPiles[i].getTopCard().value) {
+          playingPiles[cardSpot.pileNr - 8].moveTopCard(endPiles[i]);
+          autoMove();
+          gameWon = checkIfWon();
+        }
+      }
+    }
+  }
+
   for (let i = 0; i < cellPiles.length; i++) {
     if (cellPiles[i].size() == 0) {
       if (cardSpot.pileNr > 7) {
         if (cardSpot.cardNr == playingPiles[cardSpot.pileNr - 8].size() - 1) {
           playingPiles[cardSpot.pileNr - 8].moveTopCard(cellPiles[i]);
           autoMove();
+          gameWon = checkIfWon();
         }
       }
       return;
@@ -150,9 +205,11 @@ function doubleClicked() {
 }
 
 function firstPress(cardSpot) {
+
   if (getCard(cardSpot) === null) {
     return;
   }
+
   if (cardSpot.pileNr > 7) {
     if (cardSpot.cardNr == playingPiles[cardSpot.pileNr - 8].size() - 1) {
       //Top card
@@ -249,6 +306,7 @@ function secondPress(cardSpot) {
       }
     }
     autoMove();
+    gameWon = checkIfWon();
     clearSelection();
   }
 }
@@ -267,7 +325,9 @@ function moveCard(pile1, pile2, cards) {
 }
 
 function clearSelection() {
-  prevCard.selected = false;
+  if (prevCard != null) {
+    prevCard.selected = false;
+  }
   prevCard = null;
   prevCardSpot = {
     pileNr: null,
@@ -345,8 +405,8 @@ function findCardSpot(x, y) {
       }
       if (y < ppTopMargin + yspace * (playingPiles[pileNr - 8].size() - 1) + cardHeight) {
 
-        //Cheks wich card was pressed
-        for (let i = 0; i < playingPiles[pileNr - 8].size() - 1; i++) {
+        //Checks wich card was pressed
+        for (let i = 0; i < playingPiles[pileNr - 8].size(); i++) {
           if (y > ppTopMargin + yspace * i && y < ppTopMargin + yspace * (i + 1)) {
             cardNr = i;
             break;
@@ -360,21 +420,25 @@ function findCardSpot(x, y) {
       }
     }
     if (pileNr === null) {
+      return null
+    } else if (cardNr === null) {
       return null;
     }
     return {
       pileNr: pileNr,
       cardNr: cardNr
     };
+  } else {
+    return null;
   }
 
 }
 
-function checkIfWon(){
+function checkIfWon() {
   let won = true;
-  for(let i = 0; i < endPiles.length; i++){
-    if(!inOrderLH(endPiles[i])&&endPiles[i].getTopCard().value == 13){
-       won = false;
+  for (let i = 0; i < endPiles.length; i++) {
+    if (endPiles[i].getTopCard().value != 13) {
+      won = false;
     }
   }
   return won;
