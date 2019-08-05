@@ -65,11 +65,21 @@ function newDeckOfCards() {
   return deck;
 }
 
-function inOrder(cards) {
+function inReveredHL(cards) {
   //Checks if the cards in "cards" are in a numerical order
   for(let i = 0; i < cards.length-1; i++){
     if(cards[i].value-1 != cards[i+1].value){
       print("Not in order");
+       return false;
+    }
+  }
+  return true;
+}
+
+function inOrderLH(cards) {
+  //Checks if the cards in "cards" are in a numerical order
+  for(let i = 0; i < cards.length-1; i++){
+    if(cards[i].value+1 != cards[i+1].value){
        return false;
     }
   }
