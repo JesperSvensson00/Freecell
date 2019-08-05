@@ -42,6 +42,14 @@ class Card {
     text("" + this.symbols[this.suit], x + 5, y + 45);
     textAlign(RIGHT);
     text("" + this.symbols[this.suit], x + cardWidth - 7, y + cardHeight - 28);
+
+    if (this.selected) {
+      noFill();
+      stroke(255, 207, 64);
+      strokeWeight(4);
+      rect(x, y, w, h, 10);
+    }
+
   }
 
   higherThan(card) {

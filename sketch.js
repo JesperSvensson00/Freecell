@@ -17,7 +17,7 @@ var prevCardSpot = {
 var prevCard = null;
 let selectedCards = [];
 
-function preload(){
+function preload() {
 
 }
 
@@ -55,18 +55,20 @@ function draw() {
 }
 
 function drawDecks() {
-  noStroke();
-  textAlign(CENTER);
-  textSize(15);
   let sideMargin = 50;
   let xspace = (width - 2 * sideMargin - 8 * cardWidth) / 7;
   //Playing piles
   let yspace = 55;
   let ppTopMargin = 260;
   for (let pd = 0; pd < playingPiles.length; pd++) {
+    let xPos = sideMargin + (cardWidth + xspace) * pd;
+    fill(10, 10, 10, 100);
+    noStroke();
+    let shadowHeight = yspace * (playingPiles[pd].size() - 1) + cardHeight;
+    rect(xPos + 8, ppTopMargin + 5, cardWidth, shadowHeight, 10);
     for (let c = 0; c < playingPiles[pd].size(); c++) {
       let card = playingPiles[pd].deck[c];
-      card.show(sideMargin + (cardWidth + xspace) * pd, ppTopMargin + yspace * c, cardWidth, cardHeight);
+      card.show(xPos, ppTopMargin + yspace * c, cardWidth, cardHeight);
     }
   }
   //Top piles
@@ -80,6 +82,11 @@ function drawDecks() {
       strokeWeight(2);
       rect(sideMargin + (cardWidth + xspace) * cd, topMargin, cardWidth, cardHeight, 10);
     } else {
+      //Shadow
+      fill(10, 10, 10, 100);
+      noStroke();
+      rect(sideMargin + (cardWidth + xspace) * cd + 5, topMargin + 3, cardWidth, cardHeight, 10);
+      //Card
       cellPiles[cd].getTopCard().show(sideMargin + (cardWidth + xspace) * cd, topMargin, cardWidth, cardHeight);
     }
   }
@@ -89,9 +96,9 @@ function drawDecks() {
       noFill();
       stroke(10, 240, 20);
       strokeWeight(2);
-      rect(sideMargin + (cardWidth + xspace) * (ed+4), topMargin, cardWidth, cardHeight, 10);
+      rect(sideMargin + (cardWidth + xspace) * (ed + 4), topMargin, cardWidth, cardHeight, 10);
     } else {
-      endPiles[ed].getTopCard().show(sideMargin + (cardWidth + xspace) * (ed+4), topMargin, cardWidth, cardHeight);
+      endPiles[ed].getTopCard().show(sideMargin + (cardWidth + xspace) * (ed + 4), topMargin, cardWidth, cardHeight);
     }
   }
 
