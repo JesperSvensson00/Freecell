@@ -12,7 +12,7 @@ class Deck {
     let prevDeck = this.copy();
     let newDeck = [];
 
-    for(let i = 0; i < this.deck.length; i++){
+    for (let i = 0; i < this.deck.length; i++) {
       let spot = floor(random(prevDeck.length));
       newDeck[i] = prevDeck.splice(spot, 1)[0];
     }
@@ -24,32 +24,35 @@ class Deck {
     for (let i = 0; i < this.deck.length - 1; i++) {
       s += this.deck[i].toString() + ",\n ";
     }
-    s += this.deck[this.deck.length-1].toString();
+    s += this.deck[this.deck.length - 1].toString();
     return s;
   }
 
-  print(){
+  print() {
     console.log(this.toString());
   }
 
-  copy(){
+  copy() {
     let deck = [];
-    for(let i = 0; i < this.deck.length; i++){
+    for (let i = 0; i < this.deck.length; i++) {
       deck[i] = this.deck[i];
     }
     return deck;
   }
 
-  size(){
+  size() {
     return this.deck.length;
   }
 
-  moveTopCard(deck){
+  moveTopCard(deck) {
     deck.deck.push(this.deck.pop());
   }
 
-  getTopCard(){
-    return this.deck[this.size()-1];
+  getTopCard() {
+    if (this.size() == 0) {
+      return new Card(0, 5);
+    }
+    return this.deck[this.size() - 1];
   }
 
 }
@@ -67,10 +70,10 @@ function newDeckOfCards() {
 
 function inReveredHL(cards) {
   //Checks if the cards in "cards" are in a numerical order
-  for(let i = 0; i < cards.length-1; i++){
-    if(cards[i].value-1 != cards[i+1].value){
+  for (let i = 0; i < cards.length - 1; i++) {
+    if (cards[i].value - 1 != cards[i + 1].value) {
       print("Not in order");
-       return false;
+      return false;
     }
   }
   return true;
@@ -78,9 +81,9 @@ function inReveredHL(cards) {
 
 function inOrderLH(cards) {
   //Checks if the cards in "cards" are in a numerical order
-  for(let i = 0; i < cards.length-1; i++){
-    if(cards[i].value+1 != cards[i+1].value){
-       return false;
+  for (let i = 0; i < cards.length - 1; i++) {
+    if (cards[i].value + 1 != cards[i + 1].value) {
+      return false;
     }
   }
   return true;
@@ -88,10 +91,10 @@ function inOrderLH(cards) {
 
 function inAltColor(cards) {
   //Cecks if the cards color in "cards" are alternating
-  for(let i = 0; i < cards.length-1; i++){
-    if(cards[i].isRed() == cards[i+1].isRed()){
+  for (let i = 0; i < cards.length - 1; i++) {
+    if (cards[i].isRed() == cards[i + 1].isRed()) {
       print("Color is not alternating");
-       return false;
+      return false;
     }
   }
   return true;
