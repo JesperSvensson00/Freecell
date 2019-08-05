@@ -165,7 +165,7 @@ function firstPress(cardSpot) {
       selectedCards = playingPiles[cardSpot.pileNr - 8].deck.slice(cardSpot.cardNr);
 
       //The cards needs to be in order
-      if (inOrder(selectedCards) && inAltColor(selectedCards)) {
+      if (inOrderHL(selectedCards) && inAltColor(selectedCards)) {
         //Seleces all the cards
         ppPressed = true;
         //Highlights the selected cards
@@ -368,4 +368,14 @@ function findCardSpot(x, y) {
     };
   }
 
+}
+
+function checkIfWon(){
+  let won = true;
+  for(let i = 0; i < endPiles.length; i++){
+    if(!inOrderLH(endPiles[i])&&endPiles[i].getTopCard().value == 13){
+       won = false;
+    }
+  }
+  return won;
 }
