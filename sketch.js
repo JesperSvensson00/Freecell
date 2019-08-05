@@ -98,6 +98,10 @@ function drawDecks() {
       strokeWeight(2);
       rect(sideMargin + (cardWidth + xspace) * (ed + 4), topMargin, cardWidth, cardHeight, 10);
     } else {
+      //Shadow
+      fill(10, 10, 10, 100);
+      noStroke();
+      rect(sideMargin + (cardWidth + xspace) * (ed + 4) + 5, topMargin + 3, cardWidth, cardHeight, 10);
       endPiles[ed].getTopCard().show(sideMargin + (cardWidth + xspace) * (ed + 4), topMargin, cardWidth, cardHeight);
     }
   }
