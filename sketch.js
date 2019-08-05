@@ -62,7 +62,7 @@ function drawDecks() {
   let ppTopMargin = 260;
   for (let pd = 0; pd < playingPiles.length; pd++) {
     let xPos = sideMargin + (cardWidth + xspace) * pd;
-    fill(10, 10, 10, 100);
+    fill(10, 10, 10, 80);
     noStroke();
     let shadowHeight = yspace * (playingPiles[pd].size() - 1) + cardHeight;
     rect(xPos + 8, ppTopMargin + 5, cardWidth, shadowHeight, 10);
@@ -83,7 +83,7 @@ function drawDecks() {
       rect(sideMargin + (cardWidth + xspace) * cd, topMargin, cardWidth, cardHeight, 10);
     } else {
       //Shadow
-      fill(10, 10, 10, 100);
+      fill(10, 10, 10, 80);
       noStroke();
       rect(sideMargin + (cardWidth + xspace) * cd + 5, topMargin + 3, cardWidth, cardHeight, 10);
       //Card
@@ -127,6 +127,26 @@ function mouseClicked() {
   } else /*Second press*/ {
     secondPress(cardSpot);
   }
+}
+
+function doubleClicked() {
+  clearSelection();
+  let cardSpot = findCardSpot(mouseX, mouseY);
+  if (cardSpot === null) {
+    return;
+  }
+  for (let i = 0; i < cellPiles.length; i++) {
+    if (cellPiles[i].size() == 0) {
+      if (cardSpot.pileNr > 7) {
+        if (cardSpot.cardNr == playingPiles[cardSpot.pileNr - 8].size() - 1) {
+          playingPiles[cardSpot.pileNr - 8].moveTopCard(cellPiles[i]);
+          autoMove();
+        }
+      }
+      return;
+    }
+  }
+
 }
 
 function firstPress(cardSpot) {
@@ -228,7 +248,17 @@ function secondPress(cardSpot) {
         print("CP to CP");
       }
     }
+    autoMove();
     clearSelection();
+  }
+}
+
+function autoMove() {
+  for (let i = 0; i < playingPiles.length; i++) {
+    let topCard = playingPiles[i].getTopCard();
+    if (topCard.value == 1) {
+      playingPiles[i].moveTopCard(endPiles[topCard.suit]);
+    }
   }
 }
 
