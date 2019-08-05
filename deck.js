@@ -14,7 +14,7 @@ class Deck {
 
     for(let i = 0; i < this.deck.length; i++){
       let spot = floor(random(prevDeck.length));
-      newDeck[i] = prevDeck.splice(spot, 1);
+      newDeck[i] = prevDeck.splice(spot, 1)[0];
     }
     this.deck = newDeck;
   }
@@ -48,6 +48,10 @@ class Deck {
     deck.deck.push(this.deck.pop());
   }
 
+  getTopCard(){
+    return this.deck[this.size()-1];
+  }
+
 }
 
 function newDeckOfCards() {
@@ -59,4 +63,26 @@ function newDeckOfCards() {
   }
   let deck = new Deck(cards, null);
   return deck;
+}
+
+function inOrder(cards) {
+  //Checks if the cards in "cards" are in a numerical order
+  for(let i = 0; i < cards.length-1; i++){
+    if(cards[i].value-1 != cards[i+1].value){
+      print("Not in order");
+       return false;
+    }
+  }
+  return true;
+}
+
+function inAltColor(cards) {
+  //Cecks if the cards color in "cards" are alternating
+  for(let i = 0; i < cards.length-1; i++){
+    if(cards[i].isRed() == cards[i+1].isRed()){
+      print("Color is not alternating");
+       return false;
+    }
+  }
+  return true;
 }
