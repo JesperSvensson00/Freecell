@@ -2,6 +2,36 @@ class Card {
   constructor(value, suit) {
     this.value = value;
     this.suit = suit; //Hearts, Spades, Diamond, Clubs
+    this.selected = false;
+    this.symbols = ["♥", "♠", "♦", "♣"];
+  }
+
+  show(x, y, w, h) {
+    if (this.isRed()) {
+      fill(200, 10, 10);
+      strokeWeight(2);
+      stroke(0);
+      rect(x, y, w, h, 10);
+      strokeWeight(1);
+      fill(0);
+      text(this.toString(), x + (w / 2), y + 30);
+    } else {
+      fill(0);
+      stroke(255);
+      strokeWeight(2);
+      rect(x, y, w, h, 10);
+      strokeWeight(1);
+      fill(255);
+      text(this.toString(), x + (w / 2), y + 30);
+    }
+
+    if (this.selected) {
+      noFill();
+      stroke(255, 207, 64);
+      strokeWeight(4);
+      rect(x, y, w, h, 10);
+    }
+
   }
 
   higherThan(card) {
@@ -13,9 +43,9 @@ class Card {
 
   isRed() {
     if (this.suit % 2 == 0) {
-      return true;
-    } else {
       return false;
+    } else {
+      return true;
     }
   }
 
@@ -27,13 +57,13 @@ class Card {
     if (this.value > 1 && this.value < 11) {
       return this.value + "";
     } else if (this.value == 1) {
-      return "Ace";
+      return "E";
     } else if (this.value == 11) {
-      return "Knight";
+      return "Kn";
     } else if (this.value == 12) {
-      return "Queen";
+      return "D";
     } else if (this.value == 13) {
-      return "King";
+      return "K";
     }
   }
 
