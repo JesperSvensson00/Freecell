@@ -14,7 +14,7 @@ class Card {
     //Card
     fill(255);
     strokeWeight(2);
-    stroke(200);
+    stroke(200, 200, 200);
     rect(x, y, w, h, 10);
 
     //Text
@@ -29,8 +29,10 @@ class Card {
     textSize(20);
     textAlign(LEFT);
     text("" + this.valueToString(), x + 5, y + 20);
-    textAlign(RIGHT);
-    text("" + this.valueToString(), x + cardWidth - 7, y + cardHeight - 8);
+    textAlign(LEFT);
+    rotate(PI);
+    text("" + this.valueToString(), -(x + cardWidth-5), -(y + cardHeight - 20));
+    rotate(-PI);
     textAlign(CENTER);
     textSize(30);
     strokeWeight(2);
@@ -41,7 +43,9 @@ class Card {
     textAlign(LEFT);
     text("" + this.symbols[this.suit], x + 5, y + 45);
     textAlign(RIGHT);
-    text("" + this.symbols[this.suit], x + cardWidth - 7, y + cardHeight - 28);
+    rotate(PI);
+    text("" + this.symbols[this.suit], -(x + cardWidth-23), -(y + cardHeight - 48));
+    rotate(-PI);
 
     if (this.selected) {
       noFill();
