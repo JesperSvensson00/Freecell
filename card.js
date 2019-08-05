@@ -7,31 +7,41 @@ class Card {
   }
 
   show(x, y, w, h) {
+    //    //Shadow
+    //    fill(0,0,0, 40);
+    //    noStroke();
+    //    rect(x+5, y+5, w, h, 10);
+    //Card
+    fill(255);
+    strokeWeight(2);
+    stroke(200);
+    rect(x, y, w, h, 10);
+
+    //Text
     if (this.isRed()) {
-      fill(200, 10, 10);
-      strokeWeight(2);
-      stroke(0);
-      rect(x, y, w, h, 10);
-      strokeWeight(1);
-      fill(0);
-      text(this.toString(), x + (w / 2), y + 30);
+      fill(255, 0, 0);
+      stroke(255, 0, 0);
     } else {
       fill(0);
-      stroke(255);
-      strokeWeight(2);
-      rect(x, y, w, h, 10);
-      strokeWeight(1);
-      fill(255);
-      text(this.toString(), x + (w / 2), y + 30);
+      stroke(0);
     }
-
-    if (this.selected) {
-      noFill();
-      stroke(255, 207, 64);
-      strokeWeight(4);
-      rect(x, y, w, h, 10);
-    }
-
+    //Value
+    textSize(20);
+    textAlign(LEFT);
+    text("" + this.valueToString(), x + 5, y + 20);
+    textAlign(RIGHT);
+    text("" + this.valueToString(), x + cardWidth - 7, y + cardHeight - 8);
+    textAlign(CENTER);
+    textSize(30);
+    strokeWeight(2);
+    text(this.valueToString(), x + cardWidth/2, y + (cardHeight+textWidth(this.valueToString()))/2);
+    //Symbol
+    noStroke();
+    textSize(30);
+    textAlign(LEFT);
+    text("" + this.symbols[this.suit], x + 5, y + 45);
+    textAlign(RIGHT);
+    text("" + this.symbols[this.suit], x + cardWidth - 7, y + cardHeight - 28);
   }
 
   higherThan(card) {
