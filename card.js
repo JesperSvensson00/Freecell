@@ -61,9 +61,9 @@ class Card {
 
   isRed() {
     if (this.suit % 2 == 0) {
-      return false;
-    } else {
       return true;
+    } else {
+      return false;
     }
   }
 
@@ -75,11 +75,11 @@ class Card {
     if (this.value > 1 && this.value < 11) {
       return this.value + "";
     } else if (this.value == 1) {
-      return "E";
+      return "A";
     } else if (this.value == 11) {
       return "Kn";
     } else if (this.value == 12) {
-      return "D";
+      return "Q";
     } else if (this.value == 13) {
       return "K";
     }
