@@ -3,7 +3,6 @@ class Card {
     this.value = value;
     this.suit = suit; //Hearts, Spades, Diamond, Clubs
     this.selected = false;
-    this.symbols = ["♥", "♠", "♦", "♣"];
   }
 
   show(x, y, w, h) {
@@ -28,10 +27,10 @@ class Card {
     //Value
     textSize(20);
     textAlign(LEFT);
-    text("" + this.valueToString(), x + 5, y + 20);
+    text(this.valueToString(), x + 5, y + 20);
     textAlign(LEFT);
     rotate(PI);
-    text("" + this.valueToString(), -(x + cardWidth-5), -(y + cardHeight - 20));
+    text(this.valueToString(), -(x + cardWidth-5), -(y + cardHeight - 20));
     rotate(-PI);
     textAlign(CENTER);
     textSize(30);
@@ -41,10 +40,10 @@ class Card {
     noStroke();
     textSize(30);
     textAlign(LEFT);
-    text("" + this.symbols[this.suit], x + 5, y + 45);
+    text(symbols[this.suit], x + 5, y + 45);
     textAlign(RIGHT);
     rotate(PI);
-    text("" + this.symbols[this.suit], -(x + cardWidth-23), -(y + cardHeight - 48));
+    text(symbols[this.suit], -(x + cardWidth-23), -(y + cardHeight - 48));
     rotate(-PI);
 
     if (this.selected) {
