@@ -30,9 +30,15 @@ var selectedCards = [];
 
 var dragedCard;
 
+
+var sideMargin = 50;
+var xspace = 0;
+var yspace = 55;
+var ppTopMargin = 260;
+var topMargin = 30;
+
 function setup() {
   createCanvas(1400, 900);
-
 
   startDeck = newDeckOfCards();
   startDeck.shuffle();
@@ -52,6 +58,7 @@ function setup() {
 
   cardHeight = 200;
   cardWidth = 125;
+  xspace = (width - 2 * sideMargin - 8 * cardWidth) / 7;
 
   dealCards(startDeck);
   gameTime = 0;
@@ -123,12 +130,7 @@ function mouseReleased() {
 }
 
 function drawDecks() {
-  let sideMargin = 50;
-  let xspace = (width - 2 * sideMargin - 8 * cardWidth) / 7;
   //Playing piles
-  let yspace = 55;
-  let ppTopMargin = 260;
-
   //Loops through playingpiles and draws them
   for (let pd = 0; pd < playingPiles.length; pd++) {
     let xPos = sideMargin + (cardWidth + xspace) * pd;
@@ -155,7 +157,6 @@ function drawDecks() {
     }
   }
   //Top piles
-  let topMargin = 30;
 
   //Cell piles
   for (let cd = 0; cd < cellPiles.length; cd++) {
