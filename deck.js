@@ -48,6 +48,13 @@ class Deck {
     deck.deck.push(this.deck.pop());
   }
 
+  moveCards(firstCard, deck){
+    let cards = this.deck.splice(firstCard);
+    for(let i = 0; i < cards.length; i++){
+      deck.deck.push(cards[i]);
+    }
+  }
+
   getTopCard() {
     if (this.size() == 0) {
       return new Card(0, 5);
@@ -68,7 +75,7 @@ function newDeckOfCards() {
   return deck;
 }
 
-function inReveredHL(cards) {
+function inOrderHL(cards) {
   //Checks if the cards in "cards" are in a numerical order
   for (let i = 0; i < cards.length - 1; i++) {
     if (cards[i].value - 1 != cards[i + 1].value) {
