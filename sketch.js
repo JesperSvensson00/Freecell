@@ -1,3 +1,11 @@
+/*
+Fixa baserna, symboler i mitten och någon skugga
+Flera kort i taget
+Dra och släppa kortet - rita det utifrån vart på kortet man tryckte
+
+*/
+
+
 let spreadsheet;
 
 var playingPiles;
@@ -9,6 +17,10 @@ var cardHeight;
 
 var startDeck;
 var gameWon = false;
+var gameTime = 0;
+var oldMillis = 0;
+var restartBtn;
+var symbols = ["♥", "♠", "♦", "♣"];
 
 var ppPressed, epPressed, cpPressed = false;
 var prevCardSpot = {
@@ -19,10 +31,6 @@ var prevCard = null;
 var selectedCards = [];
 
 var dragedCard;
-
-function preload() {
-
-}
 
 function setup() {
   createCanvas(1400, 900);
@@ -47,22 +55,54 @@ function setup() {
   cardHeight = 200;
   cardWidth = 125;
 
-
   dealCards(startDeck);
+  gameTime = 0;
+  restartBtn = createButton("Vill du spela igen?");
+  restartBtn.position((width-200)/2, height/2-80);
+  restartBtn.mousePressed(restart);
+  restartBtn.hide();
+  restartBtn.size(200, 50);
+  gameWon = false;
 }
 
 function draw() {
   background(45, 170, 45);
 
   if (gameWon) {
-
+    restartBtn.show();
+    let time = floor(gameTime/60) + ":" + (gameTime%60);
+    noStroke();
+    fill(0);
+    textSize(40);
+    textStyle(BOLD);
+    textAlign(CENTER, CENTER);
+    text("Grattis, du klarade det!", width/2, height/2-180);
+    textSize(30);
+    textStyle(NORMAL);
+    textAlign(CENTER, CENTER);
+    text("Din tid blev: " + time + " min.", width/2, height/2-140);
   } else {
-    drawDecks();
-  }
-  //  if (mouseIsPressed && dragedCard !== null) {
-  //    dragedCard.show(mouseX, mouseY, cardWidth, cardHeight);
-  //  }
 
+    if (millis() > oldMillis + 1000) {
+      gameTime++;
+      oldMillis = millis();
+    }
+
+    drawDecks();
+
+    //Timer
+    noStroke();
+    fill(0);
+    textSize(20);
+    textAlign(RIGHT, TOP);
+    let time = floor(gameTime/60) + ":" + (gameTime%60);
+    text(time + "", width - 20, 10);
+
+
+    //    if (mouseIsPressed && dragedCard !== null) {
+    //      dragedCard.show(mouseX, mouseY, cardWidth, cardHeight);
+    //    }
+  }
 }
 
 function mousePressed() {
@@ -89,15 +129,30 @@ function drawDecks() {
   //Playing piles
   let yspace = 55;
   let ppTopMargin = 260;
+
+  //Loops through playingpiles and draws them
   for (let pd = 0; pd < playingPiles.length; pd++) {
     let xPos = sideMargin + (cardWidth + xspace) * pd;
-    fill(10, 10, 10, 80);
-    noStroke();
-    let shadowHeight = yspace * (playingPiles[pd].size() - 1) + cardHeight;
-    rect(xPos + 8, ppTopMargin + 5, cardWidth, shadowHeight, 10);
-    for (let c = 0; c < playingPiles[pd].size(); c++) {
-      let card = playingPiles[pd].deck[c];
-      card.show(xPos, ppTopMargin + yspace * c, cardWidth, cardHeight);
+    let pile = playingPiles[pd];
+
+    if (pile.size() == 0) {
+      //Draws the base
+      noFill();
+      stroke(10, 240, 20);
+      strokeWeight(2);
+      rect(xPos, ppTopMargin, cardWidth, cardHeight, 10);
+    } else {
+      //Draws the shadow of the pile
+      let shadowHeight = yspace * (playingPiles[pd].size() - 1) + cardHeight;
+      fill(10, 10, 10, 80);
+      noStroke();
+      rect(xPos + 8, ppTopMargin + 5, cardWidth, shadowHeight, 10);
+
+      //Draws all the cards for every pile
+      for (let c = 0; c < pile.size(); c++) {
+        let card = pile.deck[c];
+        card.show(xPos, ppTopMargin + yspace * c, cardWidth, cardHeight);
+      }
     }
   }
   //Top piles
@@ -122,10 +177,18 @@ function drawDecks() {
   //End piles
   for (let ed = 0; ed < endPiles.length; ed++) {
     if (endPiles[ed].size() == 0) {
-      noFill();
-      stroke(10, 240, 20);
-      strokeWeight(2);
-      rect(sideMargin + (cardWidth + xspace) * (ed + 4), topMargin, cardWidth, cardHeight, 10);
+      //Inner shadow
+      fill(45, 170, 45);
+      strokeWeight(6);
+      stroke(10, 10, 10, 100);
+      rect(sideMargin + (cardWidth + xspace) * (ed + 4)+3, topMargin+3, cardWidth-6, cardHeight-6, 10);
+
+      //Symbol
+      fill(0, 0, 0, 100);
+      noStroke();
+      textSize(80);
+      textAlign(CENTER, CENTER);
+      text(symbols[ed], sideMargin + (cardWidth + xspace) * (ed + 4) + cardWidth/2, topMargin + cardHeight/2);
     } else {
       //Shadow
       fill(10, 10, 10, 100);
@@ -146,14 +209,11 @@ function dealCards(dealDeck) {
 
 function mouseClicked() {
   let cardSpot;
-  if (mouseY > 0 && mouseY < height) {
-    cardSpot = findCardSpot(mouseX, mouseY);
-  } else {
-    return;
-  }
+  cardSpot = findCardSpot(mouseX, mouseY);
 
   //If the press is not on a card
   if (cardSpot === null) {
+    clearSelection();
     return;
   }
 
@@ -168,12 +228,10 @@ function mouseClicked() {
 function doubleClicked() {
   clearSelection();
   let cardSpot;
-  if (mouseY > 0 && mouseY < height) {
-    cardSpot = findCardSpot(mouseX, mouseY);
-  } else {
-    return;
-  }
+  cardSpot = findCardSpot(mouseX, mouseY);
+
   if (cardSpot === null) {
+    clearSelection();
     return;
   }
   if (cardSpot.pileNr > 7) {
@@ -260,7 +318,9 @@ function secondPress(cardSpot) {
       if (cardSpot.pileNr > 7) {
         let pile1 = playingPiles[prevCardSpot.pileNr - 8];
         let pile2 = playingPiles[cardSpot.pileNr - 8];
-        if (pile1.getTopCard().isRed() != pile2.getTopCard().isRed()) {
+        if (pile2.size() == 0) { //PP to empty PP
+          pile1.moveTopCard(pile2);
+        } else if (pile1.getTopCard().isRed() != pile2.getTopCard().isRed()) {
           if (pile1.getTopCard().value == pile2.getTopCard().value - 1) {
             pile1.moveTopCard(pile2);
           } else {
@@ -282,6 +342,7 @@ function secondPress(cardSpot) {
         } else {
           print("Korten ska ligga i ordning äss till kung i bashögarna!");
         }
+
       } else {
         //PP to CP
         let cellPile = cellPiles[cardSpot.pileNr];
@@ -295,14 +356,41 @@ function secondPress(cardSpot) {
     } else if (cpPressed) {
       //Try move from cell piles
       if (cardSpot.pileNr > 7) {
-        //CP to PP
-        print("CP to PP");
+        if (cardSpot.pileNr > 7) {
+          let cellPile = cellPiles[prevCardSpot.pileNr];
+          let playingPile = playingPiles[cardSpot.pileNr - 8];
+          if (playingPile.size() == 0) { //CP to empty PP
+            cellPile.moveTopCard(playingPile);
+          } else if (cellPile.getTopCard().isRed() != playingPile.getTopCard().isRed()) {
+            if (cellPile.getTopCard().value == playingPile.getTopCard().value - 1) {
+              cellPile.moveTopCard(playingPile);
+            } else {
+              print("Korten ska ligga i ordningen kung till äss!");
+            }
+          } else {
+            print("Korten ska ligga med växlande färg!");
+          }
+        }
       } else if (cardSpot.pileNr > 3) {
-        //CP to EP
-        print("CP to EP");
+        let endPile = endPiles[cardSpot.pileNr - 4];
+        let cellPile = cellPiles[prevCardSpot.pileNr];
+        if (endPile.getTopCard().value == cellPile.getTopCard().value - 1) {
+          if (endPile.getTopCard().suit == cellPile.getTopCard().suit) {
+            cellPile.moveTopCard(endPile);
+          } else {
+            print("Korten ska ha samma färg i bashögarna!");
+          }
+        } else {
+          print("Korten ska ligga i ordning äss till kung i bashögarna!");
+        }
       } else {
-        //CP to CP
-        print("CP to CP");
+        let cellPile1 = cellPiles[cardSpot.pileNr];
+        let cellPile2 = cellPiles[prevCardSpot.pileNr];
+        if (cellPile1.size() == 0) {
+          cellPile2.moveTopCard(cellPile1);
+        } else {
+          print("Det får bara finnas ett kort här!");
+        }
       }
     }
     autoMove();
@@ -318,10 +406,6 @@ function autoMove() {
       playingPiles[i].moveTopCard(endPiles[topCard.suit]);
     }
   }
-}
-
-function moveCard(pile1, pile2, cards) {
-  //Card move from pile1 to pile2
 }
 
 function clearSelection() {
@@ -403,8 +487,9 @@ function findCardSpot(x, y) {
       if (pileNr === null) {
         return null;
       }
-      if (y < ppTopMargin + yspace * (playingPiles[pileNr - 8].size() - 1) + cardHeight) {
-
+      if (playingPiles[pileNr - 8].size() == 0) {
+        cardNr = 0;
+      } else if (y < ppTopMargin + yspace * (playingPiles[pileNr - 8].size() - 1) + cardHeight) {
         //Checks wich card was pressed
         for (let i = 0; i < playingPiles[pileNr - 8].size(); i++) {
           if (y > ppTopMargin + yspace * i && y < ppTopMargin + yspace * (i + 1)) {
@@ -413,9 +498,6 @@ function findCardSpot(x, y) {
           } else {
             cardNr = playingPiles[pileNr - 8].size() - 1;
           }
-        }
-        if (pileNr === null) {
-          return null;
         }
       }
     }
@@ -442,4 +524,27 @@ function checkIfWon() {
     }
   }
   return won;
+}
+
+function restart(){
+  startDeck = newDeckOfCards();
+  startDeck.shuffle();
+
+  playingPiles = [new Deck([], 8),
+        new Deck([], 9),
+        new Deck([], 10),
+        new Deck([], 11),
+        new Deck([], 12),
+        new Deck([], 13),
+        new Deck([], 14),
+        new Deck([], 15)
+    ];
+
+  cellPiles = [new Deck([], 0), new Deck([], 1), new Deck([], 2), new Deck([], 3)];
+  endPiles = [new Deck([], 4), new Deck([], 5), new Deck([], 6), new Deck([], 7)];
+
+  dealCards(startDeck);
+  gameTime = 0;
+  gameWon = false;
+  restartBtn.hide();
 }
