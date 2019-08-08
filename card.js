@@ -6,10 +6,7 @@ class Card {
   }
 
   show(x, y, w, h) {
-    //    //Shadow
-    //    fill(0,0,0, 40);
-    //    noStroke();
-    //    rect(x+5, y+5, w, h, 10);
+
     //Card
     fill(255);
     strokeWeight(2);
