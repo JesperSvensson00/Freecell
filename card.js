@@ -12,23 +12,26 @@ class Card {
   }
 
   show(x, y, w, h) {
-    if (!this.draged) {
-      if (dist(this.x, this.y, x, y) < this.vel) {
-        this.x = x;
-        this.y = y;
-      } else {
-        if (this.x != x) {
-          this.speed.set(x - this.x, y - this.y);
-          this.speed.setMag(this.vel);
-          this.x += this.speed.x;
-        }
-        if (this.y != y) {
-          this.speed.set(x - this.x, y - this.y);
-          this.speed.setMag(this.vel);
-          this.y += this.speed.y;
-        }
-      }
-    }
+//    if (!this.draged) {
+//      if (dist(this.x, this.y, x, y) < this.vel) {
+//        this.x = x;
+//        this.y = y;
+//      } else {
+//        if (this.x != x) {
+//          this.speed.set(x - this.x, y - this.y);
+//          this.speed.setMag(this.vel);
+//          this.x += this.speed.x;
+//        }
+//        if (this.y != y) {
+//          this.speed.set(x - this.x, y - this.y);
+//          this.speed.setMag(this.vel);
+//          this.y += this.speed.y;
+//        }
+//      }
+//    }
+
+    this.x = x;
+    this.y = y;
 
     //Card
     fill(255);
@@ -132,5 +135,9 @@ class Card {
       default:
         return "blank";
     }
+  }
+
+  print(){
+    console.log(this.toString());
   }
 }

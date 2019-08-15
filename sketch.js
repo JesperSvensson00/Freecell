@@ -28,12 +28,13 @@ var prevCardSpot = {
 var prevCard = null;
 var selectedCards = [];
 
-var dragedCard;
+var dragedCard = null;
 var dragedCardClicked = {
   x: 0,
   y: 0,
   dragging: false
 }
+var mousePressedMillis = 0;
 
 
 var sideMargin = 50;
@@ -42,7 +43,14 @@ var yspace = 55;
 var ppTopMargin = 260;
 var topMargin = 30;
 
+function preload() {
+  let soundIndex = '' + floor(random(1, 5));
+  cardSound = loadSound('res/sounds/cardPlace' + soundIndex + '.wav');
+  cardSound.setVolume(0.6);
+}
+
 function setup() {
+  console.clear();
   createCanvas(1400, 900);
 
   startDeck = newDeckOfCards();
@@ -114,69 +122,6 @@ function draw() {
       dragedCard.show(mouseX + dragedCardClicked.x, mouseY + dragedCardClicked.y, cardWidth, cardHeight);
     }
   }
-}
-
-function mousePressed() {
-  let cardSpot = findCardSpot(mouseX, mouseY);
-  if (cardSpot == null) {
-    return;
-  }
-  if (cardSpot.pileNr > 7) {
-    dragedCard = playingPiles[cardSpot.pileNr - 8].getTopCard();
-    dragedCard.dragged = true;
-  } else if (cardSpot.pileNr < 3) {
-    dragedCard = cellPiles[cardSpot.pileNr].getTopCard();
-    dragedCard.dragged = true;
-  }
-  dragedCardClicked = {
-    x: dragedCard.x - mouseX,
-    y: dragedCard.y - mouseY
-  };
-  prevCardSpot = cardSpot;
-  dragedCardClicked.dragged = true;
-}
-
-function mouseReleased() {
-  let cardSpot = findCardSpot(mouseX, mouseY);
-  if (cardSpot == null) {
-    dragedCard = null;
-    return;
-  }
-  //Finding the new card
-  if (cardSpot.pileNr > 7) {
-    newPile = playingPiles[cardSpot.pileNr - 8];
-    newCard = newPile.getTopCard();
-  } else if (cardSpot.pileNr < 3) {
-    newPile = cellPiles[cardSpot.pileNr];
-    if (newPile.size() > 0) {
-      newCard = newPile.getTopCard();
-    }
-  }
-
-  if (prevCardSpot.pileNr > 7) {
-    prevPile = playingPiles[prevCardSpot.pileNr - 8];
-  } else if (prevCardSpot.pileNr < 3) {
-    prevPile = cellPiles[prevCardSpot.pileNr];
-  }
-
-  if (newPile.size() == 0) {
-    prevPile.moveTopCard(newPile);
-  } else if (dragedCard.isRed() != newCard.isRed()) {
-    if (dragedCard.value == newPile.getTopCard().value - 1) {
-      prevPile.moveTopCard(newPile);
-    } else {
-      print("Korten ska ligga i ordningen kung till äss!");
-    }
-  } else {
-    print("Korten ska ligga med växlande färg!");
-  }
-
-  dragedCard.dragged = false;
-  dragedCard.selected = false;
-  dragedCardClicked.dragged = false;
-  autoMove();
-  gameWon = checkIfWon();
-  clearSelection();
 }
 
 function drawDecks() {
@@ -256,78 +201,113 @@ function drawDecks() {
 
 }
 
-function dealCards(dealDeck) {
-  let size = dealDeck.size();
-  for (let i = 0; i < size; i++) {
-    dealDeck.moveTopCard(playingPiles[i % playingPiles.length]);
-  }
-}
-
-function mouseClicked() {
-  if (dragedCardClicked.dragged) {
-    dragedCardClicked.dragged = false;
+function mousePressed() {
+  mousePressedMillis = millis();
+  //Finds the card wich should be dragged
+  let cardSpot = findCardSpot(mouseX, mouseY);
+  //Checks if there was a card at the press
+  if (cardSpot == null || (cardSpot.pileNr > 3 && cardSpot.pileNr < 8)) {
     return;
   }
-
-  let cardSpot;
-  cardSpot = findCardSpot(mouseX, mouseY);
-
-  //If the press is not on a card
-  if (cardSpot === null) {
-    clearSelection();
-    return;
-  }
-
-  //Check if it is the first or second press
-  if (!ppPressed && !epPressed && !cpPressed) /*First press*/ {
-    firstPress(cardSpot);
-  } else /*Second press*/ {
-    secondPress(cardSpot);
-  }
-}
-
-function doubleClicked() {
-  clearSelection();
-  let cardSpot;
-  cardSpot = findCardSpot(mouseX, mouseY);
-
-  if (cardSpot === null) {
-    clearSelection();
-    return;
+  //If a card is already selected skip drag
+  if (ppPressed || cpPressed) {
+    if (prevCardSpot !== null) {
+      if (cardSpot.pileNr != prevCardSpot.pileNr) {
+        return;
+      }
+    } else {
+      return;
+    }
   }
   if (cardSpot.pileNr > 7) {
     if (cardSpot.cardNr == playingPiles[cardSpot.pileNr - 8].size() - 1) {
-      let card = playingPiles[cardSpot.pileNr - 8].getTopCard();
-      for (let i = 0; i < endPiles.length; i++) {
-        if (card.suit == i && card.value - 1 == endPiles[i].getTopCard().value) {
-          playingPiles[cardSpot.pileNr - 8].moveTopCard(endPiles[i]);
-          autoMove();
-          gameWon = checkIfWon();
-          return;
-        }
-      }
-
-      //Moves the clicked card to the cellpiles if there is a spot
-      for (let i = 0; i < cellPiles.length; i++) { //Loops through the cellpiles
-        if (cellPiles[i].size() == 0) { //If the pile is empty
-          playingPiles[cardSpot.pileNr - 8].moveTopCard(cellPiles[i]);
-          autoMove();
-          gameWon = checkIfWon();
-          return;
-        }
-      }
+      dragedCard = getCard(cardSpot);
+    } else {
+      return;
     }
   } else if (cardSpot.pileNr < 4) {
-    let card = cellPiles[cardSpot.pileNr].getTopCard();
-    for (let i = 0; i < endPiles.length; i++) {
-      if (card.suit == i && card.value - 1 == endPiles[i].getTopCard().value) {
-        cellPiles[cardSpot.pileNr].moveTopCard(endPiles[i]);
-        autoMove();
-        gameWon = checkIfWon();
-        return;
-      }
+    if (cardSpot.cardNr == cellPiles[cardSpot.pileNr].size() - 1) {
+      dragedCard = getCard(cardSpot);
+    } else {
+      return;
     }
   }
+  if (dragedCard !== null) {
+    dragedCardClicked = {
+      x: dragedCard.x - mouseX,
+      y: dragedCard.y - mouseY
+    };
+    dragedCard.dragged = true;
+    prevCardSpot = cardSpot;
+    dragedCardClicked.dragged = true;
+  }
+}
+
+function mouseReleased() {
+  let cardSpot = findCardSpot(mouseX, mouseY);
+  if (cardSpot == null) {
+    clearSelection();
+    return;
+  }
+  //Check if it was a short press and then preform a regular press
+  if (millis() < mousePressedMillis + 100 || cardSpot.pileNr == prevCardSpot.pileNr || dragedCard === null) {
+    if (dragedCard !== null) {
+      dragedCard.dragged = false;
+      dragedCard = null;
+    }
+
+    //Check if it is the first or second press
+    if (!ppPressed && !epPressed && !cpPressed) /*First press*/ {
+      firstPress(cardSpot);
+    } else /*Second press*/ {
+      secondPress(cardSpot);
+    }
+    return;
+  }
+
+  //If there was a drag but not a dragged card
+  if (dragedCard === null) {
+    clearSelection();
+    return;
+  }
+
+  //Finding the new card
+  if (cardSpot.pileNr > 7) {
+    newPile = playingPiles[cardSpot.pileNr - 8];
+    newCard = newPile.getTopCard();
+  } else if (cardSpot.pileNr < 4) {
+    newPile = cellPiles[cardSpot.pileNr];
+    if (newPile.size() > 0) {
+      newCard = newPile.getTopCard();
+    }
+  }
+
+  if (prevCardSpot.pileNr > 7) {
+    prevPile = playingPiles[prevCardSpot.pileNr - 8];
+  } else if (prevCardSpot.pileNr < 4) {
+    prevPile = cellPiles[prevCardSpot.pileNr];
+  }
+
+  if (newPile.size() == 0) {
+    prevPile.moveTopCard(newPile);
+  } else if (dragedCard.isRed() != newCard.isRed()) {
+    if (dragedCard.value == newPile.getTopCard().value - 1) {
+      prevPile.moveTopCard(newPile);
+    } else {
+      print("Korten ska ligga i ordningen kung till äss!");
+    }
+  } else {
+    print("Korten ska ligga med växlande färg!");
+  }
+
+  dragedCard.dragged = false;
+  dragedCard.selected = false;
+  dragedCardClicked.dragged = false;
+  autoMove();
+  gameWon = checkIfWon();
+  clearSelection();
+
+  cardSound.play();
 }
 
 function firstPress(cardSpot) {
@@ -482,6 +462,61 @@ function secondPress(cardSpot) {
     autoMove();
     gameWon = checkIfWon();
     clearSelection();
+    cardSound.play();
+  }
+}
+
+function doubleClicked() {
+  clearSelection();
+  let cardSpot;
+  cardSpot = findCardSpot(mouseX, mouseY);
+
+  if (cardSpot === null) {
+    clearSelection();
+    return;
+  }
+  if (cardSpot.pileNr > 7) {
+    if (cardSpot.cardNr == playingPiles[cardSpot.pileNr - 8].size() - 1) {
+      let card = playingPiles[cardSpot.pileNr - 8].getTopCard();
+      for (let i = 0; i < endPiles.length; i++) {
+        if (card.suit == i && card.value - 1 == endPiles[i].getTopCard().value) {
+          playingPiles[cardSpot.pileNr - 8].moveTopCard(endPiles[i]);
+          autoMove();
+          gameWon = checkIfWon();
+          cardSound.play();
+          return;
+        }
+      }
+
+      //Moves the clicked card to the cellpiles if there is a spot
+      for (let i = 0; i < cellPiles.length; i++) { //Loops through the cellpiles
+        if (cellPiles[i].size() == 0) { //If the pile is empty
+          playingPiles[cardSpot.pileNr - 8].moveTopCard(cellPiles[i]);
+          autoMove();
+          gameWon = checkIfWon();
+          cardSound.play();
+          return;
+        }
+      }
+    }
+  } else if (cardSpot.pileNr < 4) {
+    let card = cellPiles[cardSpot.pileNr].getTopCard();
+    for (let i = 0; i < endPiles.length; i++) {
+      if (card.suit == i && card.value - 1 == endPiles[i].getTopCard().value) {
+        cellPiles[cardSpot.pileNr].moveTopCard(endPiles[i]);
+        autoMove();
+        gameWon = checkIfWon();
+        cardSound.play();
+        return;
+      }
+    }
+  }
+}
+
+function dealCards(dealDeck) {
+  let size = dealDeck.size();
+  for (let i = 0; i < size; i++) {
+    dealDeck.moveTopCard(playingPiles[i % playingPiles.length]);
   }
 }
 
@@ -490,6 +525,7 @@ function autoMove() {
     let topCard = playingPiles[i].getTopCard();
     if (topCard.value == 1) {
       playingPiles[i].moveTopCard(endPiles[topCard.suit]);
+      cardSound.play();
     }
   }
 }
@@ -503,12 +539,19 @@ function clearSelection() {
     pileNr: null,
     cardNr: null
   };
-  dragedCardClicked = {x: 0, y: 0};
+  dragedCardClicked = {
+    x: 0,
+    y: 0,
+    dragging: false
+  };
   for (let i = 0; i < selectedCards.length; i++) {
     selectedCards[i].selected = false;
   }
   selectedCards = [];
-  dragedCard = null;
+  if (dragedCard !== null) {
+    dragedCard.dragged = false;
+    dragedCard = null;
+  }
   ppPressed = false;
   epPressed = false;
   cpPressed = false;
