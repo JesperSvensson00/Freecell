@@ -29,6 +29,11 @@ var prevCard = null;
 var selectedCards = [];
 
 var dragedCard;
+var dragedCardClicked = {
+  x: 0,
+  y: 0,
+  dragging: false
+}
 
 
 var sideMargin = 50;
@@ -105,28 +110,73 @@ function draw() {
     text(time + "", width - 50, 8);
 
 
-    //    if (mouseIsPressed && dragedCard !== null) {
-    //      dragedCard.show(mouseX, mouseY, cardWidth, cardHeight);
-    //    }
+    if (mouseIsPressed && dragedCard !== null) {
+      dragedCard.show(mouseX + dragedCardClicked.x, mouseY + dragedCardClicked.y, cardWidth, cardHeight);
+    }
   }
 }
 
 function mousePressed() {
-  if (mouseX < width && mouseX > 0 && mouseY > 0 && mouseY < height) {
-    let cardSpot = findCardSpot(mouseX, mouseY);
-    if (cardSpot == null) {
-      return;
-    }
-    if (cardSpot.pileNr > 7) {
-      dragedCard = playingPiles[cardSpot.pileNr - 8].getTopCard();
-    } else if (cardSpot.pileNr < 3) {
-      dragedCard = cellPiles[cardSpot.pileNr].getTopCard();
-    }
+  let cardSpot = findCardSpot(mouseX, mouseY);
+  if (cardSpot == null) {
+    return;
   }
+  if (cardSpot.pileNr > 7) {
+    dragedCard = playingPiles[cardSpot.pileNr - 8].getTopCard();
+    dragedCard.dragged = true;
+  } else if (cardSpot.pileNr < 3) {
+    dragedCard = cellPiles[cardSpot.pileNr].getTopCard();
+    dragedCard.dragged = true;
+  }
+  dragedCardClicked = {
+    x: dragedCard.x - mouseX,
+    y: dragedCard.y - mouseY
+  };
+  prevCardSpot = cardSpot;
+  dragedCardClicked.dragged = true;
 }
 
 function mouseReleased() {
-  dragedCard = null;
+  let cardSpot = findCardSpot(mouseX, mouseY);
+  if (cardSpot == null) {
+    dragedCard = null;
+    return;
+  }
+  //Finding the new card
+  if (cardSpot.pileNr > 7) {
+    newPile = playingPiles[cardSpot.pileNr - 8];
+    newCard = newPile.getTopCard();
+  } else if (cardSpot.pileNr < 3) {
+    newPile = cellPiles[cardSpot.pileNr];
+    if (newPile.size() > 0) {
+      newCard = newPile.getTopCard();
+    }
+  }
+
+  if (prevCardSpot.pileNr > 7) {
+    prevPile = playingPiles[prevCardSpot.pileNr - 8];
+  } else if (prevCardSpot.pileNr < 3) {
+    prevPile = cellPiles[prevCardSpot.pileNr];
+  }
+
+  if (newPile.size() == 0) {
+    prevPile.moveTopCard(newPile);
+  } else if (dragedCard.isRed() != newCard.isRed()) {
+    if (dragedCard.value == newPile.getTopCard().value - 1) {
+      prevPile.moveTopCard(newPile);
+    } else {
+      print("Korten ska ligga i ordningen kung till äss!");
+    }
+  } else {
+    print("Korten ska ligga med växlande färg!");
+  }
+
+  dragedCard.dragged = false;
+  dragedCard.selected = false;
+  dragedCardClicked.dragged = false;
+  autoMove();
+  gameWon = checkIfWon();
+  clearSelection();
 }
 
 function drawDecks() {
@@ -152,7 +202,9 @@ function drawDecks() {
       //Draws all the cards for every pile
       for (let c = 0; c < pile.size(); c++) {
         let card = pile.deck[c];
-        card.show(xPos, ppTopMargin + yspace * c, cardWidth, cardHeight);
+        if (!card.dragged) {
+          card.show(xPos, ppTopMargin + yspace * c, cardWidth, cardHeight);
+        }
       }
     }
   }
@@ -166,12 +218,16 @@ function drawDecks() {
       strokeWeight(2);
       rect(sideMargin + (cardWidth + xspace) * cd, topMargin, cardWidth, cardHeight, 10);
     } else {
-      //Shadow
-      fill(10, 10, 10, 80);
-      noStroke();
-      rect(sideMargin + (cardWidth + xspace) * cd + 5, topMargin + 3, cardWidth, cardHeight, 10);
-      //Card
-      cellPiles[cd].getTopCard().show(sideMargin + (cardWidth + xspace) * cd, topMargin, cardWidth, cardHeight);
+      let card = cellPiles[cd].getTopCard();
+      if (!card.dragged) {
+        //Shadow
+        fill(10, 10, 10, 80);
+        noStroke();
+        rect(sideMargin + (cardWidth + xspace) * cd + 5, topMargin + 3, cardWidth, cardHeight, 10);
+
+        //Card
+        card.show(sideMargin + (cardWidth + xspace) * cd, topMargin, cardWidth, cardHeight);
+      }
     }
   }
   //End piles
@@ -208,6 +264,11 @@ function dealCards(dealDeck) {
 }
 
 function mouseClicked() {
+  if (dragedCardClicked.dragged) {
+    dragedCardClicked.dragged = false;
+    return;
+  }
+
   let cardSpot;
   cardSpot = findCardSpot(mouseX, mouseY);
 
@@ -442,10 +503,12 @@ function clearSelection() {
     pileNr: null,
     cardNr: null
   };
+  dragedCardClicked = {x: 0, y: 0};
   for (let i = 0; i < selectedCards.length; i++) {
     selectedCards[i].selected = false;
   }
   selectedCards = [];
+  dragedCard = null;
   ppPressed = false;
   epPressed = false;
   cpPressed = false;
