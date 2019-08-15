@@ -6,22 +6,27 @@ class Card {
     this.x = 0;
     this.y = 0;
     this.speed = createVector(0);
+    this.vel = 90;
+
+    this.dragged = false;
   }
 
   show(x, y, w, h) {
-    if (dist(this.x, this.y, x, y) < 40) {
-      this.x = x;
-      this.y = y;
-    } else {
-      if (this.x != x) {
-        this.speed.set(x - this.x, y - this.y);
-        this.speed.setMag(40);
-        this.x += this.speed.x;
-      }
-      if (this.y != y) {
-        this.speed.set(x - this.x, y - this.y);
-        this.speed.setMag(40);
-        this.y += this.speed.y;
+    if (!this.draged) {
+      if (dist(this.x, this.y, x, y) < this.vel) {
+        this.x = x;
+        this.y = y;
+      } else {
+        if (this.x != x) {
+          this.speed.set(x - this.x, y - this.y);
+          this.speed.setMag(this.vel);
+          this.x += this.speed.x;
+        }
+        if (this.y != y) {
+          this.speed.set(x - this.x, y - this.y);
+          this.speed.setMag(this.vel);
+          this.y += this.speed.y;
+        }
       }
     }
 
@@ -113,16 +118,16 @@ class Card {
   suitToString() {
     switch (this.suit) {
       case 0:
-        return "spades";
-        break;
-      case 1:
         return "hearts";
         break;
+      case 1:
+        return "spades";
+        break;
       case 2:
-        return "clubs";
+        return "diamonds";
         break;
       case 3:
-        return "diamonds";
+        return "clubs";
         break;
       default:
         return "blank";
