@@ -12,26 +12,23 @@ class Card {
   }
 
   show(x, y, w, h) {
-//    if (!this.draged) {
-//      if (dist(this.x, this.y, x, y) < this.vel) {
-//        this.x = x;
-//        this.y = y;
-//      } else {
-//        if (this.x != x) {
-//          this.speed.set(x - this.x, y - this.y);
-//          this.speed.setMag(this.vel);
-//          this.x += this.speed.x;
-//        }
-//        if (this.y != y) {
-//          this.speed.set(x - this.x, y - this.y);
-//          this.speed.setMag(this.vel);
-//          this.y += this.speed.y;
-//        }
-//      }
-//    }
-
-    this.x = x;
-    this.y = y;
+    if (!this.draged) {
+      if (dist(this.x, this.y, x, y) < this.vel) {
+        this.x = x;
+        this.y = y;
+      } else {
+        if (this.x != x) {
+          this.speed.set(x - this.x, y - this.y);
+          this.speed.setMag(this.vel);
+          this.x += this.speed.x;
+        }
+        if (this.y != y) {
+          this.speed.set(x - this.x, y - this.y);
+          this.speed.setMag(this.vel);
+          this.y += this.speed.y;
+        }
+      }
+    }
 
     //Card
     fill(255);
@@ -49,13 +46,14 @@ class Card {
     }
     //Value
     textSize(20);
-    textAlign(LEFT);
+    textAlign(LEFT, BASELINE);
     text(this.valueToString(), this.x + 5, this.y + 20);
     textAlign(LEFT);
     rotate(PI);
     text(this.valueToString(), -(this.x + cardWidth - 5), -(this.y + cardHeight - 20));
     rotate(-PI);
-    textAlign(CENTER);
+    //Middle
+    textAlign(CENTER, BASELINE);
     textSize(30);
     strokeWeight(2);
     text(this.valueToString(), this.x + cardWidth / 2, this.y + (cardHeight + textWidth(this.valueToString())) / 2);

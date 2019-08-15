@@ -46,16 +46,6 @@ class Deck {
 
   moveTopCard(deck) {
     deck.deck.push(this.deck.pop());
-//    if (deck.spot > 7) {
-//      deck.getTopCard().x = sideMargin + (cardWidth + xspace) * (deck.spot-8);
-//      deck.getTopCard().y = ppTopMargin + yspace * deck.size()-1;
-//    } else if (deck.spot > 3) {
-//      deck.getTopCard().x = sideMargin + (cardWidth + xspace) * deck.spot;
-//      deck.getTopCard().y = topMargin;
-//    } else {
-//      deck.getTopCard().x = sideMargin + (cardWidth + xspace) * deck.spot;
-//      deck.getTopCard().y = topMargin;
-//    }
   }
 
   moveCards(firstCard, deck) {

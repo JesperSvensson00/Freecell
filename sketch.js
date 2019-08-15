@@ -1,6 +1,6 @@
 /*
-Dra och släppa kortet - rita det utifrån vart på kortet man tryckte
-Animationer
+Spara senaste draget
+Lägg till börja om knapp
 */
 
 
@@ -47,40 +47,41 @@ function preload() {
   let soundIndex = '' + floor(random(1, 5));
   cardSound = loadSound('res/sounds/cardPlace' + soundIndex + '.wav');
   cardSound.setVolume(0.6);
+  dealingSound = loadSound('res/sounds/cardFan2.wav');
+  dealingSound.setVolume(0.6);
 }
 
 function setup() {
   console.clear();
   createCanvas(1400, 900);
 
-  startDeck = newDeckOfCards();
-  startDeck.shuffle();
-
-  playingPiles = [new Deck([], 8),
-        new Deck([], 9),
-        new Deck([], 10),
-        new Deck([], 11),
-        new Deck([], 12),
-        new Deck([], 13),
-        new Deck([], 14),
-        new Deck([], 15)
-    ];
-
-  cellPiles = [new Deck([], 0), new Deck([], 1), new Deck([], 2), new Deck([], 3)];
-  endPiles = [new Deck([], 4), new Deck([], 5), new Deck([], 6), new Deck([], 7)];
+//  startDeck = newDeckOfCards();
+//  startDeck.shuffle();
+//
+//  playingPiles = [new Deck([], 8),
+//        new Deck([], 9),
+//        new Deck([], 10),
+//        new Deck([], 11),
+//        new Deck([], 12),
+//        new Deck([], 13),
+//        new Deck([], 14),
+//        new Deck([], 15)
+//    ];
+//
+//  cellPiles = [new Deck([], 0), new Deck([], 1), new Deck([], 2), new Deck([], 3)];
+//  endPiles = [new Deck([], 4), new Deck([], 5), new Deck([], 6), new Deck([], 7)];
+//  dealCards(startDeck);
 
   cardHeight = 200;
   cardWidth = 125;
   xspace = (width - 2 * sideMargin - 8 * cardWidth) / 7;
-
-  dealCards(startDeck);
   gameTime = 0;
   restartBtn = createButton("Vill du spela igen?");
   restartBtn.position((width - 200) / 2, height / 2 - 80);
   restartBtn.mousePressed(restart);
   restartBtn.hide();
   restartBtn.size(200, 50);
-  gameWon = false;
+  gameWon = true;
 }
 
 function draw() {
@@ -518,6 +519,7 @@ function dealCards(dealDeck) {
   for (let i = 0; i < size; i++) {
     dealDeck.moveTopCard(playingPiles[i % playingPiles.length]);
   }
+  dealingSound.play(0.1, 2, 0.5, 0.2);
 }
 
 function autoMove() {
