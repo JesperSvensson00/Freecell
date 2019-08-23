@@ -13,10 +13,14 @@ class Card {
 
   show(x, y, w, h) {
     if (!this.draged) {
-      if (dist(this.x, this.y, x, y) < this.vel) {
+      if (this.x==x && this.y == y) {
+        //Do nothing
+      } else if (dist(this.x, this.y, x, y) < this.vel) {
         this.x = x;
         this.y = y;
+        frameRate(10);
       } else {
+        frameRate(60);
         if (this.x != x) {
           this.speed.set(x - this.x, y - this.y);
           this.speed.setMag(this.vel);
@@ -135,7 +139,7 @@ class Card {
     }
   }
 
-  print(){
+  print() {
     console.log(this.toString());
   }
 }

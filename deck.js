@@ -62,6 +62,30 @@ class Deck {
     return this.deck[this.size() - 1];
   }
 
+  sort() {
+    this.deck = sortDeck(this);
+  }
+
+}
+
+function sortDeck(deck) {
+  let cards = deck.deck;
+  let swapp;
+  let n = deck.size();
+  do {
+    swapp = false;
+    for (var i = 0; i < n - 1; i++) {
+      if (cards[i].value < cards[i + 1].value) {
+        var temp = cards[i];
+        cards[i] = cards[i + 1];
+        cards[i + 1] = temp;
+        swapp = true;
+      }
+    }
+    n--;
+  } while (swapp);
+
+  return cards;
 }
 
 function newDeckOfCards() {

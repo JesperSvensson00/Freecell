@@ -2,6 +2,7 @@
 <head>
   <title>Freecell</title>
   <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
   <script src="p5.min.js"></script>
   <script src="p5.dom.min.js"></script>
   <script src="p5.sound.min.js"></script>
@@ -9,13 +10,31 @@
   <script src="card.js"></script>
   <script src="deck.js"></script>
   <style>
-    button{
+    button.playAgain{
       background: white;
       border-radius: 10px;
       border: white;
       box-shadow: 0px 0px 30px 1px rgba(0,0,0,0.75);
       font-size: 20px;
     }
+
+    button.menu{
+      background: white;
+      border-radius: 6px;
+      border: white;
+      box-shadow: 0px 0px 10px 1px rgba(0,0,0,0.75);
+      font-size: 16px;
+      transition-duration: 0.4s;
+      user-select: none;
+      outline: none;
+    }
+
+    button.menu:hover{
+      margin-top: -1px;
+      box-shadow: 0 8px 16px 0 rgba(0,0,0,0.24),0 17px 50px 0 rgba(0,0,0,0.19);
+    }
+
+
   </style>
 </head>
 <body>
