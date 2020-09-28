@@ -45,7 +45,9 @@ class Deck {
   }
 
   moveTopCard(deck) {
+    let card = this.getTopCard();
     deck.deck.push(this.deck.pop());
+    return card;
   }
 
   moveCards(firstCard, deck) {
@@ -65,7 +67,6 @@ class Deck {
   sort() {
     this.deck = sortDeck(this);
   }
-
 }
 
 function sortDeck(deck) {
@@ -103,7 +104,7 @@ function inOrderHL(cards) {
   //Checks if the cards in "cards" are in a numerical order
   for (let i = 0; i < cards.length - 1; i++) {
     if (cards[i].value - 1 != cards[i + 1].value) {
-      print("Not in order");
+      console.log("Not in order");
       return false;
     }
   }
@@ -124,7 +125,7 @@ function inAltColor(cards) {
   //Cecks if the cards color in "cards" are alternating
   for (let i = 0; i < cards.length - 1; i++) {
     if (cards[i].isRed() == cards[i + 1].isRed()) {
-      print("Color is not alternating");
+      console.log("Color is not alternating");
       return false;
     }
   }

@@ -3,88 +3,105 @@ class Card {
     this.value = value;
     this.suit = suit; //Hearts, Spades, Diamond, Clubs
     this.selected = false;
-    this.x = 0;
-    this.y = 0;
+    // this.x = random(0, width);
+    // this.y = random(0, height);
+    this.x = width / 2;
+    this.y = height - cardHeight;
     this.speed = createVector(0);
-    this.vel = 90;
+    this.moving = false;
 
     this.dragged = false;
   }
 
   show(x, y, w, h) {
-    if (!this.draged) {
-      if (this.x==x && this.y == y) {
-        //Do nothing
-      } else if (dist(this.x, this.y, x, y) < this.vel) {
-        this.x = x;
-        this.y = y;
-        frameRate(10);
+    this.x = x;
+    this.y = y;
+
+    if (!highScreen) {
+      //If not on a small screen e.g. mobile
+      //Card - background
+      fill(255);
+      strokeWeight(2);
+      stroke(200, 200, 200);
+      rect(this.x, this.y, w, h, 10);
+
+      //Text color
+      if (this.isRed()) {
+        fill(255, 0, 0);
+        stroke(255, 0, 0);
       } else {
-        frameRate(60);
-        if (this.x != x) {
-          this.speed.set(x - this.x, y - this.y);
-          this.speed.setMag(this.vel);
-          this.x += this.speed.x;
-        }
-        if (this.y != y) {
-          this.speed.set(x - this.x, y - this.y);
-          this.speed.setMag(this.vel);
-          this.y += this.speed.y;
-        }
+        fill(0);
+        stroke(0);
+      }
+      textStyle(NORMAL);
+      //Value
+      textSize(20);
+      textAlign(LEFT, BASELINE);
+      text(this.valueToString(), this.x + 5, this.y + 20);
+      textAlign(LEFT);
+      rotate(PI);
+      text(this.valueToString(), -(this.x + cardWidth - 5), -(this.y + cardHeight - 20));
+      rotate(-PI);
+      //Middle - value
+      textAlign(CENTER, BASELINE);
+      textSize(30);
+      strokeWeight(2);
+      text(this.valueToString(), this.x + cardWidth / 2, this.y + (cardHeight + 30) / 2);
+      //Symbol
+      noStroke();
+      textSize(30);
+      textAlign(LEFT);
+      text(symbols[this.suit], this.x + 5, this.y + 45);
+      textAlign(RIGHT);
+      rotate(PI);
+      text(symbols[this.suit], -(this.x + cardWidth - 23), -(this.y + cardHeight - 48));
+      rotate(-PI);
+
+      if (this.selected) {
+        noFill();
+        stroke(255, 207, 64);
+        strokeWeight(4);
+        rect(this.x, this.y, w, h, 10);
+      }
+    } else {
+      //On a small screen e.g. mobile
+      //Card - background
+      fill(255);
+      strokeWeight(1);
+      stroke(200, 200, 200);
+      rect(this.x, this.y, w, h, 6);
+
+      //Text color
+      if (this.isRed()) {
+        fill(255, 0, 0);
+        stroke(255, 0, 0);
+      } else {
+        fill(0);
+        stroke(0);
+      }
+      textStyle(NORMAL);
+      //Value - top left corner
+      textSize(10);
+      textAlign(LEFT, BASELINE);
+      text(this.valueToString(), this.x + 3, this.y + 15);
+      //Middle - value
+      textAlign(CENTER, BASELINE);
+      textSize(20);
+      strokeWeight(1);
+      text(this.valueToString(), this.x + cardWidth / 2, this.y + (cardHeight + 20) / 2);
+      //Symbol - top right
+      noStroke();
+      textSize(10);
+      textAlign(RIGHT, BASELINE);
+      text(symbols[this.suit], this.x + cardWidth - 3, this.y + 15);
+
+      if (this.selected) {
+        noFill();
+        stroke(255, 207, 64);
+        strokeWeight(4);
+        rect(this.x, this.y, w, h, 6);
       }
     }
-
-    //Card
-    fill(255);
-    strokeWeight(2);
-    stroke(200, 200, 200);
-    rect(this.x, this.y, w, h, 10);
-
-    //Text
-    if (this.isRed()) {
-      fill(255, 0, 0);
-      stroke(255, 0, 0);
-    } else {
-      fill(0);
-      stroke(0);
-    }
-    //Value
-    textSize(20);
-    textAlign(LEFT, BASELINE);
-    text(this.valueToString(), this.x + 5, this.y + 20);
-    textAlign(LEFT);
-    rotate(PI);
-    text(this.valueToString(), -(this.x + cardWidth - 5), -(this.y + cardHeight - 20));
-    rotate(-PI);
-    //Middle
-    textAlign(CENTER, BASELINE);
-    textSize(30);
-    strokeWeight(2);
-    text(this.valueToString(), this.x + cardWidth / 2, this.y + (cardHeight + textWidth(this.valueToString())) / 2);
-    //Symbol
-    noStroke();
-    textSize(30);
-    textAlign(LEFT);
-    text(symbols[this.suit], this.x + 5, this.y + 45);
-    textAlign(RIGHT);
-    rotate(PI);
-    text(symbols[this.suit], -(this.x + cardWidth - 23), -(this.y + cardHeight - 48));
-    rotate(-PI);
-
-    if (this.selected) {
-      noFill();
-      stroke(255, 207, 64);
-      strokeWeight(4);
-      rect(this.x, this.y, w, h, 10);
-    }
-
-  }
-
-  move(x, y) {
-    this.speed.set(x, y);
-    this.speed.setMag(1);
-    this.x += this.speed.x;
-    this.y += this.speed.y;
   }
 
   higherThan(card) {
