@@ -3,17 +3,4 @@
 # Example .gitignore files: https://github.com/github/gitignore
 /bower_components/
 /node_modules/
-/res/sounds/cardFan1.wav
-/res/sounds/cardOpenPackage1.wav
-/res/sounds/cardOpenPackage2.wav
-/res/sounds/cardShove1.wav
-/res/sounds/cardShove2.wav
-/res/sounds/cardShove3.wav
-/res/sounds/cardShove4.wav
-/res/sounds/cardShuffle.wav
-/res/sounds/cardSlide1.wav
-/res/sounds/cardSlide2.wav
-/res/sounds/cardSlide3.wav
-/res/sounds/cardSlide4.wav
-/res/sounds/cardSlide5.wav
-/res/sounds/no use/
+.vscode/settings.json

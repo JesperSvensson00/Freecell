@@ -1,6 +1,4 @@
 /*
-Dra flera kort
-Fixa bugg med essen i början
 Fixa bugg med korten när dem delas ut första rundan
 */
 
@@ -32,7 +30,8 @@ var prevCardSpot = {
 };
 var prevCard = null;
 var selectedCards = [];
-var dragedCard = null;
+var dragedCards = [];
+var testCards = [];
 var dragedCardClicked = {
 	x: 0,
 	y: 0,
@@ -54,6 +53,7 @@ var ratio;
 var symbols = [ '♥', '♠', '♦', '♣' ];
 var movingCards = [];
 var animationSpeed = 200;
+var fontRatio = 1;
 
 function preload() {
 	let soundIndex = '' + floor(random(1, 5));
@@ -72,9 +72,9 @@ function preload() {
 
 function setup() {
 	// Disable scrolling.
-	document.ontouchmove = function(e) {
-		e.preventDefault();
-	};
+	// document.ontouchmove = function(e) {
+	// 	e.preventDefault();
+	// };
 	createCanvas(windowWidth - 200, windowHeight - 50);
 	gameTime = 0;
 
@@ -201,8 +201,15 @@ function draw() {
 		text(time + '', width - 50, 8);
 
 		//Om ett kort flyttas med musen ritas det vid muspekaren över de andra korten.
-		if (mouseIsPressed && dragedCard !== null) {
-			dragedCard.show(mouseX + dragedCardClicked.x, mouseY + dragedCardClicked.y, cardWidth, cardHeight);
+		if (mouseIsPressed && dragedCards !== []) {
+			for (let i = 0; i < dragedCards.length; i++) {
+				dragedCards[i].show(
+					mouseX + dragedCardClicked.x,
+					mouseY + dragedCardClicked.y + i * 40,
+					cardWidth,
+					cardHeight
+				);
+			}
 		}
 
 		//Kollar om ett kort flyttas och ökar då fps:en
@@ -213,7 +220,7 @@ function draw() {
 				break;
 			}
 		}
-		if (cardMoving || dragedCard !== null) {
+		if (cardMoving || dragedCards !== []) {
 			frameRate(30);
 		} else {
 			frameRate(5);
@@ -387,7 +394,6 @@ function touchStarted() {
 
 	//If a card is already selected and is not the same - skip drag
 	if (ppPressed || cpPressed) {
-		//    if (prevCardSpot !== null) {
 		if (cardSpot.pileNr != prevCardSpot.pileNr) {
 			//Don't return if selected card
 			return;
@@ -396,24 +402,50 @@ function touchStarted() {
 
 	if (cardSpot.pileNr > 7) {
 		if (cardSpot.cardNr == piles[cardSpot.pileNr].size() - 1) {
-			dragedCard = getCard(cardSpot);
+			dragedCards[0] = getCard(cardSpot);
 		} else {
-			return;
+			/*Multiple cards selected*/
+			//Creates an array of the selected cards
+			selectedCards = piles[cardSpot.pileNr].deck.slice(cardSpot.cardNr);
+
+			//The cards needs to be in order
+			if (inOrderHL(selectedCards) && inAltColor(selectedCards)) {
+				// console.log(selectedCards);
+				if (movebleCards(cardSpot.pileNr) >= selectedCards.length) {
+					dragedCards = selectedCards;
+					for (card of dragedCards) {
+						card.dragged = true;
+					}
+				} else {
+					errorSound.play();
+					clearSelection();
+					return;
+				}
+			} else {
+				errorSound.play();
+				clearSelection();
+				return;
+			}
+			ppPressed = true;
 		}
 	} else if (cardSpot.pileNr < 4) {
 		if (cardSpot.cardNr == piles[cardSpot.pileNr].size() - 1) {
-			dragedCard = getCard(cardSpot);
+			dragedCards[0] = getCard(cardSpot);
+			cpPressed = true;
 		} else {
+			clearSelection();
 			return;
 		}
 	}
 
-	if (dragedCard !== null) {
+	if (dragedCards !== []) {
 		dragedCardClicked = {
-			x: dragedCard.x - mouseX,
-			y: dragedCard.y - mouseY
+			x: dragedCards[0].x - mouseX,
+			y: dragedCards[0].y - mouseY
 		};
-		dragedCard.dragged = true;
+		for (card of dragedCards) {
+			card.dragged = true;
+		}
 		prevCardSpot = cardSpot;
 		dragedCardClicked.dragged = true;
 	}
@@ -426,7 +458,7 @@ function touchEnded() {
 
 	let cardSpot = findCardSpot(mouseX, mouseY);
 	if (cardSpot == null) {
-		if (dragedCard !== null) {
+		if (dragedCards !== [] && (ppPressed || cpPressed)) {
 			cardSound.play();
 		}
 
@@ -434,10 +466,12 @@ function touchEnded() {
 		return;
 	}
 	//Check if it was a short press and then preform a regular press
-	if (millis() - mousePressedMillis < 100 || cardSpot.pileNr == prevCardSpot.pileNr || dragedCard === null) {
-		if (dragedCard !== null) {
-			dragedCard.dragged = false;
-			dragedCard = null;
+	if (millis() - mousePressedMillis < 100 || cardSpot.pileNr == prevCardSpot.pileNr || dragedCards === []) {
+		if (dragedCards !== null) {
+			for (card of dragedCards) {
+				card.dragged = false;
+			}
+			dragedCards = [];
 		}
 
 		//Check if it is the first or second press
@@ -452,8 +486,15 @@ function touchEnded() {
 	}
 
 	//If there was a drag but not a dragged card
-	if (dragedCard === null) {
+	if (dragedCards === []) {
 		clearSelection();
+		return;
+	}
+
+	//Check if it was the same pile
+	if (cardSpot.pileNr == prevCardSpot.pileNr) {
+		clearSelection();
+		console.log('Same');
 		return;
 	}
 
@@ -461,11 +502,19 @@ function touchEnded() {
 	if (cardSpot.pileNr > 7) {
 		newPile = piles[cardSpot.pileNr];
 		newCard = newPile.getTopCard();
+	} else if (cardSpot.pileNr > 3) {
+		newPile = piles[cardSpot.pileNr];
+		if (newPile.size() > 0) {
+			newCard = newPile.getTopCard();
+		}
 	} else if (cardSpot.pileNr < 4) {
 		newPile = piles[cardSpot.pileNr];
 		if (newPile.size() > 0) {
 			newCard = newPile.getTopCard();
 		}
+	} else {
+		console.log('Något blev fel!');
+		errorSound.play();
 	}
 
 	if (prevCardSpot.pileNr > 7) {
@@ -474,29 +523,57 @@ function touchEnded() {
 		prevPile = piles[prevCardSpot.pileNr];
 	}
 
-	if (newPile.size() == 0) {
-		moveCard(prevCardSpot.pileNr, cardSpot.pileNr);
-	} else if (dragedCard.isRed() != newCard.isRed()) {
-		if (dragedCard.value == newPile.getTopCard().value - 1) {
-			moveCard(prevCardSpot.pileNr, cardSpot.pileNr);
+	if (cardSpot.pileNr < 4) {
+		//Free cells
+		//Om högen är tom flytta oavsett
+		if (newPile.size() == 0 && dragedCards.length < 2) {
+			moveCards(prevCardSpot.pileNr, cardSpot.pileNr, dragedCards);
 		} else {
-			console.log('Korten ska ligga i ordningen kung till äss!');
+			console.log('Korten ska ligga med växlande färg!');
 			errorSound.play();
-			dragedCard.moving = true;
-			movingCards.push({
-				card: dragedCard,
-				prevPile: null,
-				newPile: prevCardSpot.pileNr
-			});
+		}
+	} else if (cardSpot.pileNr < 8) {
+		//Om kortet drars till bas högarna
+		if (dragedCards[0].suit == cardSpot.pileNr - 4) {
+			let val = 0;
+			if (newPile.size > 0) {
+				val = newCard.value;
+			}
+			if (dragedCards[0].value == val + 1) {
+				moveCards(prevCardSpot.pileNr, cardSpot.pileNr, dragedCards);
+			} else {
+				console.log('Korten måste liggar i ordningen äss till kung!');
+				errorSound.play();
+			}
+		} else {
+			console.log('Korten måste liggar i rätt färg!');
+			errorSound.play();
+		}
+	} else if (cardSpot.pileNr < 16) {
+		if (newPile.size() == 0) {
+			//Om högen är tom flytta oavsett
+			moveCards(prevCardSpot.pileNr, cardSpot.pileNr, dragedCards);
+		} else if (dragedCards[0].isRed() != newCard.isRed()) {
+			//Annars kontrollera att det är rätt färg och värde
+			if (dragedCards[0].value == newPile.getTopCard().value - 1) {
+				moveCards(prevCardSpot.pileNr, cardSpot.pileNr, dragedCards);
+			} else {
+				console.log('Korten ska ligga i ordningen kung till äss!');
+				errorSound.play();
+			}
+		} else {
+			console.log('Korten ska ligga med växlande färg!');
+			errorSound.play();
 		}
 	} else {
-		console.log('Korten ska ligga med växlande färg!');
-		errorSound.play();
+		clearSelection();
+		return;
 	}
 
-	dragedCard.dragged = false;
-	dragedCard.selected = false;
-	dragedCardClicked.dragged = false;
+	for (card of dragedCards) {
+		card.dragged = false;
+		dragedCards.selected = false;
+	}
 	autoMove();
 	gameWon = checkIfWon();
 	clearSelection();
@@ -892,9 +969,11 @@ function clearSelection() {
 		selectedCards[i].selected = false;
 	}
 	selectedCards = [];
-	if (dragedCard !== null) {
-		dragedCard.dragged = false;
-		dragedCard = null;
+	if (dragedCards !== []) {
+		for (card of dragedCards) {
+			card.dragged = false;
+		}
+		dragedCards = [];
 	}
 	ppPressed = false;
 	epPressed = false;
@@ -1065,6 +1144,9 @@ function movebleCards(pileNr) {
 }
 
 function undoMove() {
+	if (moveHistory.length < 1) {
+		return;
+	}
 	let move = moveHistory.pop();
 	if (move.cards != null) {
 		piles[move.pile2].moveCards(piles[move.pile2].size() - move.cards.length, piles[move.pile1]);
@@ -1077,8 +1159,8 @@ function undoMove() {
 
 function resize() {
 	//1400 900 1,55
-	let ww = windowWidth - 20;
-	let wh = windowHeight - 40;
+	let ww = windowWidth;
+	let wh = windowHeight;
 	if (windowWidth > 1550) {
 		ww = 1550;
 	}
@@ -1110,6 +1192,8 @@ function resize() {
 		restartBtn.position(btnW + btnSpace * 3, 15);
 		returnBtn.size(btnW, 20);
 		returnBtn.position(btnW * 2 + btnSpace * 4, 15);
+
+		fontRatio = ww / 500;
 	} else {
 		//Korten anpassas efter höjden - bredskärm
 		highScreen = false;
@@ -1128,6 +1212,8 @@ function resize() {
 		returnBtn.position(width - 280, 15);
 		undoBtn.size(80, 20);
 		undoBtn.position(width - 380, 15);
+
+		fontRatio = wh * 1.5 / 1200;
 	}
 	resizeCanvas(ww, wh);
 }
