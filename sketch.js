@@ -1,7 +1,3 @@
-/*
-Fixa bugg med korten när dem delas ut första rundan
-*/
-
 var piles; //0-3 cellPiles //4-7 basepiles //7-15 playingpiles
 var startDeck;
 
@@ -1082,6 +1078,7 @@ function checkIfWon() {
 }
 
 function restart() {
+	resize();
 	gameWon = false;
 	dealing = true;
 	frameRate(60);
