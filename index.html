@@ -1,52 +1,55 @@
 <html>
-<head>
-  <title>Freecell</title>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
-  <script src="p5.min.js"></script>
-  <script src="p5.dom.min.js"></script>
-  <script src="p5.sound.min.js"></script>
-  <script src="sketch.js"></script>
-  <script src="card.js"></script>
-  <script src="deck.js"></script>
-  <style>
-    body {
-      background-color: rgb(45, 170, 45);
-      overscroll-behavior-y: contain;
-      margin: 0;
-    }
+  <head>
+    <title>Freecell</title>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.7.2/p5.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.7.2/addons/p5.sound.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.7.2/addons/p5.dom.min.js"></script>
+    <script src="/freecell/sketch.js"></script>
+    <script src="/freecell/card.js"></script>
+    <script src="/freecell/deck.js"></script>
+    <script src="/freecell/cardFunctions.js"></script>
+    <script src="/freecell/mouseEvents.js"></script>
+    <style>
+      body {
+        background-color: rgb(45, 170, 45);
+        overscroll-behavior-y: contain;
+        margin: 0;
+      }
 
-    button.playAgain{
-      background: white;
-      border-radius: 10px;
-      border: white;
-      box-shadow: 0px 0px 30px 1px rgba(0,0,0,0.75);
-      font-size: 20px;
-    }
+      button.playAgain {
+        background: white;
+        border-radius: 10px;
+        border: white;
+        box-shadow: 0px 0px 30px 1px rgba(0, 0, 0, 0.75);
+        font-size: 20px;
+      }
 
-    button.menu{
-      background: white;
-      border-radius: 6px;
-      border: white;
-      box-shadow: 0px 0px 10px 1px rgba(0,0,0,0.75);
-      font-size: 16px;
-      transition-duration: 0.4s;
-      user-select: none;
-      outline: none;
-    }
+      button.menu {
+        background: white;
+        border-radius: 6px;
+        border: white;
+        box-shadow: 0px 0px 10px 1px rgba(0, 0, 0, 0.75);
+        font-size: 16px;
+        transition-duration: 0.4s;
+        user-select: none;
+        outline: none;
+      }
 
-    button.menu:hover{
-      margin-top: -1px;
-      box-shadow: 0 8px 16px 0 rgba(0,0,0,0.24),0 17px 50px 0 rgba(0,0,0,0.19);
-    }
+      button.menu:hover {
+        margin-top: -1px;
+        box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.24),
+          0 17px 50px 0 rgba(0, 0, 0, 0.19);
+      }
 
-    canvas {
-      padding: 0;
-    }
-
-  </style>
-</head>
-<body>
-
-</body>
+      canvas {
+        padding: 0;
+      }
+    </style>
+  </head>
+  <body></body>
 </html>
